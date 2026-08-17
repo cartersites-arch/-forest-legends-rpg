@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d1f16">
+<title>Forest Legends RPG</title>
+<style>
+:root {
+  --bg:#09140e;
+  --panel:#12251a;
+  --panel2:#183321;
+  --text:#f7fff9;
+  --muted:#b8c9bd;
+  --accent:#ffe06b;
+  --green:#69d18a;
+  --danger:#ff7d7d;
+  --line:rgba(255,255,255,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{min-height:100vh;background:
+radial-gradient(circle at 10% 10%,rgba(90,255,150,.12),transparent 28%),
+radial-gradient(circle at 90% 20%,rgba(255,220,100,.10),transparent 25%),
+linear-gradient(180deg,#0c1c13,#08110c 70%)}
+#app{max-width:760px;margin:0 auto;min-height:100vh;padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 18px)}
+.topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.logo{font-weight:900;letter-spacing:.4px;font-size:18px}
+.iconbtn{border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--text);border-radius:12px;padding:9px 11px;font-weight:800}
+.hero{position:relative;overflow:hidden;border-radius:22px;border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.35);background:#111;min-height:280px}
+.hero img{width:100%;height:42vh;max-height:430px;min-height:280px;object-fit:cover;display:block}
+.fade{position:absolute;left:0;right:0;bottom:0;padding:50px 16px 16px;background:linear-gradient(transparent,rgba(0,0,0,.88))}
+.chapter{font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:#d9e6dc;font-weight:900}
+.title{font-size:28px;line-height:1.05;font-weight:950;margin-top:4px;text-shadow:0 2px 10px rgba(0,0,0,.55)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}
+.stat{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:14px;padding:9px 7px;text-align:center}
+.stat b{display:block;font-size:16px} .stat small{color:var(--muted);font-size:10px}
+.card{background:linear-gradient(180deg,var(--panel),#0f2117);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 12px 30px rgba(0,0,0,.22)}
+.story{font-size:17px;line-height:1.5;white-space:pre-line}
+.choices{display:grid;gap:9px;margin-top:12px}
+.choice{width:100%;border:0;border-radius:16px;padding:15px 14px;text-align:left;font-size:16px;font-weight:900;background:linear-gradient(180deg,#e9ffe5,#cfeac7);color:#102016;box-shadow:0 5px 0 #8aa67e;touch-action:manipulation}
+.choice:active{transform:translateY(3px);box-shadow:0 2px 0 #8aa67e}
+.choice.danger{background:linear-gradient(180deg,#ffe4e4,#ffc9c9);box-shadow:0 5px 0 #b57a7a;color:#341616}
+.pillrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.pill{background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:999px;padding:7px 10px;font-size:12px;font-weight:800}
+.bar{height:9px;background:#27352d;border-radius:99px;overflow:hidden;margin-top:5px}
+.fill{height:100%;background:var(--green);width:100%;transition:width .3s}
+.enemy .fill{background:var(--danger)}
+.notice{border-left:4px solid var(--accent);padding:10px 12px;background:rgba(255,224,107,.08);border-radius:12px;margin-top:10px;font-size:14px}
+.hidden{display:none!important}
+.screen{display:none} .screen.active{display:block}
+.center{text-align:center}
+.bigbtn{width:100%;border:0;border-radius:18px;padding:17px;font-size:18px;font-weight:950;background:var(--accent);color:#332800;box-shadow:0 6px 0 #a78f38;margin-top:10px}
+.secondary{background:#d9e5dc;box-shadow:0 6px 0 #819487;color:#152019}
+.reset{background:#4c1717;color:#ffdada;box-shadow:0 6px 0 #2c0d0d}
+.small{color:var(--muted);font-size:13px;line-height:1.4}
+.invgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.inv{border:1px solid var(--line);border-radius:14px;padding:10px;background:rgba(255,255,255,.05)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 18px);z-index:50;background:#111f16;color:white;padding:10px 14px;border-radius:999px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.4);font-size:13px;font-weight:800;opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+.toast.show{opacity:1}
+@media (max-width:390px){.title{font-size:24px}.story{font-size:16px}.choice{font-size:15px}.stats{gap:5px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="logo">ð² FOREST LEGENDS RPG</div>
+    <button class="iconbtn" onclick="openMenu()">â°</button>
+  </div>
+
+  <section id="titleScreen" class="screen active">
+    <div class="hero">
+      <img src="images/scene7.jpg" alt="Unicorn in the forest">
+      <div class="fade">
+        <div class="chapter">Mobile RPG</div>
+        <div class="title">Bigfoot, the Unicorn & the Three Shards</div>
+      </div>
+    </div>
+    <div class="card center">
+      <p class="story">A magical crystal has shattered across Bigfoot territory. Find all three shards, survive the woods, and decide who you trust.</p>
+      <button class="bigbtn" onclick="newGame()">NEW GAME</button>
+      <button id="continueBtn" class="bigbtn secondary hidden" onclick="continueGame()">CONTINUE</button>
+      <p class="small">Designed for phone screens. Tap choices to play. Progress saves automatically in Safari.</p>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="screen">
+    <div class="hero">
+      <img id="sceneImg" src="images/scene1.jpg" alt="Game scene">
+      <div class="fade">
+        <div id="chapter" class="chapter">Chapter 1</div>
+        <div id="sceneTitle" class="title">Something in the Woods</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b id="hpText">10/10</b><small>â¤ï¸ HP</small></div>
+      <div class="stat"><b id="levelText">1</b><small>â­ LEVEL</small></div>
+      <div class="stat"><b id="xpText">0</b><small>â¨ XP</small></div>
+      <div class="stat"><b id="shardsText">0/3</b><small>ð SHARDS</small></div>
+    </div>
+
+    <div id="enemyBox" class="card enemy hidden">
+      <b id="enemyName">Enemy</b>
+      <div class="bar"><div id="enemyHpBar" class="fill"></div></div>
+      <div class="small" id="enemyHpText"></div>
+    </div>
+
+    <div class="card">
+      <div id="story" class="story"></div>
+      <div id="notice" class="notice hidden"></div>
+      <div id="choices" class="choices"></div>
+    </div>
+  </section>
+
+  <section id="menuScreen" class="screen">
+    <div class="card">
+      <h2>Game Menu</h2>
+      <div class="pillrow" id="abilityPills"></div>
+      <h3>Inventory</h3>
+      <div id="inventory" class="invgrid"></div>
+      <button class="bigbtn secondary" onclick="closeMenu()">BACK TO GAME</button>
+      <button class="bigbtn reset" onclick="confirmReset()">RESET GAME</button>
+    </div>
+  </section>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const IMAGES = ["images/scene1.jpg", "images/scene2.jpg", "images/scene3.jpg", "images/scene4.jpg", "images/scene5.jpg", "images/scene6.jpg", "images/scene7.jpg"];
+
+const scenes = {
+  start: {
+    chapter:"Chapter 1", title:"Something in the Woods", img:0,
+    text:`You wake up in a strange forest.
+
+A man in a straw hat is hugging a tree. Behind him, a silver unicorn watches you. Then the ground shakes.
+
+THUMP. THUMP.
+
+A huge Bigfoot steps onto the trail.`,
+    choices:[
+      ["ð¦ Walk toward the unicorn","unicorn"],
+      ["ð« Offer Bigfoot your snack bar","snack"],
+      ["ð³ Hug the tree too","tree"],
+      ["ðª Draw your pocketknife","knife"]
+    ]
+  },
+  unicorn: {
+    chapter:"Chapter 2", title:"The Unicorn Test", img:6,
+    text:`The unicorn lowers its horn and touches your hand.
+
+A silver mark flashes across your skin. Suddenly you understand its voice.
+
+âHe stole something from me.â
+
+Bigfoot points back at the unicorn and growls.`,
+    enter:()=>{gainXP(25); addAbility("ð¦ Unicorn Mark");},
+    choices:[
+      ["ð« Offer Bigfoot a peace snack","snack"],
+      ["ð¦¶ Ask Bigfoot what happened","bigfootTalk"],
+      ["ð¦ Search the clearing","search"]
+    ]
+  },
+  snack: {
+    chapter:"Chapter 3", title:"The Snack Treaty", img:5,
+    text:`Bigfoot takes the snack, eats half, and hands the rest back.
+
+Then he pulls a glowing crystal shard from the fur around his neck.
+
+The unicorn stomps the ground.
+
+âTHAT'S MINE.â
+
+Bigfoot points deeper into the forest. Something out there has the other pieces.`,
+    enter:()=>{ if(!state.flags.snack){state.flags.snack=true; state.shards=Math.max(state.shards,1); state.inventory["Half snack bar"]=1; gainXP(25); toast("ð Crystal Shard #1 acquired");} },
+    choices:[
+      ["ð¦ Search the area for clues","search"],
+      ["ð¦¶ Follow Bigfoot","bigfootTalk"],
+      ["ð¦ Ask the unicorn to track the shards","track"]
+    ]
+  },
+  tree: {
+    chapter:"Chapter 2", title:"The Tree Hugger", img:1,
+    text:`You hug the tree.
+
+The man nods approvingly like this is a completely reasonable survival strategy.
+
+Under your hand, the bark begins glowing. A hoof-shaped mark appears in the wood.`,
+    enter:()=>gainXP(15),
+    choices:[
+      ["ð Inspect the glowing mark","search"],
+      ["ð¦ Call the unicorn over","unicorn"],
+      ["ð¦¶ Ask Bigfoot what he knows","bigfootTalk"]
+    ]
+  },
+  knife: {
+    chapter:"Chapter 2", title:"Terrible Weapon Choice", img:4,
+    text:`You pull the pocketknife.
+
+Bigfoot looks at the knife.
+
+Then at you.
+
+Then back at the knife.
+
+He slowly raises one eyebrow. Somehow that hurts more than an attack.`,
+    enter:()=>{damage(2); gainXP(5);},
+    choices:[
+      ["ð« Put the knife away and offer a snack","snack"],
+      ["ð¦¶ Try talking instead","bigfootTalk"],
+      ["âï¸ Challenge Bigfoot anyway","fightBigfoot"]
+    ]
+  },
+  bigfootTalk: {
+    chapter:"Chapter 3", title:"Bigfoot's Warning", img:4,
+    text:`Bigfoot scratches three symbols into the dirt:
+
+ð  ð  ð
+
+Then he draws a gate beneath them and points toward the mountains.
+
+Three shards. One gate. Something very bad behind it.`,
+    enter:()=>gainXP(20),
+    choices:[
+      ["ð¦ Have the unicorn track the shards","track"],
+      ["ð¦ Search for tracks","search"]
+    ]
+  },
+  search: {
+    chapter:"Chapter 4", title:"What the Light Finds", img:1,
+    text:`Your flashlight beam turns silver.
+
+Long claw marks circle the clearing. Scratched into a tree are the words:
+
+THREE SHARDS OPEN THE GATE.
+
+Two red eyes blink between the trees and vanish.`,
+    enter:()=>{gainXP(25); addAbility("ð¦ Silver Light");},
+    choices:[
+      ["ð¦ Track the missing shards","track"],
+      ["ð´ Hunt whatever is watching you","stalker"]
+    ]
+  },
+  track: {
+    chapter:"Chapter 5", title:"Two Roads", img:6,
+    text:`The unicorn touches its horn to your shard.
+
+Two beams of light shoot into the woods.
+
+One points toward an abandoned carnival midway.
+
+The other points toward a black cave in the hills.
+
+A third red glow appears behind you. Something is following.`,
+    enter:()=>{gainXP(25); addAbility("â¨ Unicorn Flash");},
+    choices:[
+      ["ð¡ Go to the abandoned midway","midway"],
+      ["ð³ï¸ Head for the cave","cave"],
+      ["ð´ Turn and face the stalker","stalker"]
+    ]
+  },
+  stalker: {
+    chapter:"Encounter", title:"The Red-Eyed Stalker", img:4,
+    text:`A shadow creature lunges from the ferns.
+
+It has too many teeth, glowing red eyes, and absolutely no interest in diplomacy.`,
+    battle:{name:"Red-Eyed Stalker", hp:8, maxHp:8, next:"midway"},
+    choices:[]
+  },
+  midway: {
+    chapter:"Chapter 6", title:"The Abandoned Midway", img:2,
+    text:`Rusting carnival lights flicker to life as you enter.
+
+A game booth sits beneath a crooked sign:
+
+WIN THE SHARD.
+
+Behind the counter stands a small Bigfoot holding three wooden cups.`,
+    choices:[
+      ["ð¯ Play the shell game","shell"],
+      ["ð° Bribe him with 3 coins","bribe"],
+      ["ð¦ Use Silver Light to reveal the shard","reveal"]
+    ]
+  },
+  shell: {
+    chapter:"Midway Challenge", title:"Pick a Cup", img:2,
+    text:`The little Bigfoot shuffles three cups at ridiculous speed.
+
+You only get one guess.`,
+    choices:[
+      ["ð¥¤ Left cup","shellPick"],
+      ["ð¥¤ Middle cup","shellPick"],
+      ["ð¥¤ Right cup","shellPick"]
+    ]
+  },
+  shellPick: {
+    chapter:"Midway Challenge", title:"Lucky Guess", img:3,
+    text:`You lift the cup.
+
+The glowing shard is underneath.
+
+The little Bigfoot throws both hands in the air like this result has personally offended him.`,
+    enter:()=>getShard(2),
+    choices:[
+      ["ð³ï¸ Head for the cave","cave"]
+    ]
+  },
+  bribe: {
+    chapter:"Midway Challenge", title:"Commerce Wins Again", img:3,
+    text:`You slide three coins across the counter.
+
+The little Bigfoot pockets them instantly and hands over the shard.
+
+Apparently ancient magical quests also have transaction fees.`,
+    enter:()=>{ if(state.coins>=3){state.coins-=3; getShard(2);} },
+    choices:[
+      ["ð³ï¸ Head for the cave","cave"]
+    ]
+  },
+  reveal: {
+    chapter:"Midway Challenge", title:"Silver Light", img:3,
+    text:`Your flashlight shines through all three cups.
+
+The shard glows beneath the center one.
+
+The little Bigfoot stares at your flashlight, then reluctantly hands it over.`,
+    enter:()=>getShard(2),
+    choices:[
+      ["ð³ï¸ Head for the cave","cave"]
+    ]
+  },
+  cave: {
+    chapter:"Chapter 7", title:"The Black Cave", img:0,
+    text:`The cave mouth breathes cold air.
+
+Deep inside, the third shard pulses with blue light.
+
+A massive shape uncoils around it.`,
+    choices:[
+      ["ð¥ Enter the cave","caveFight"],
+      ["ð« Use the half snack bar as bait","bait"]
+    ]
+  },
+  bait: {
+    chapter:"Chapter 7", title:"The Snack Gambit", img:5,
+    text:`You toss the half snack bar into the darkness.
+
+The cave guardian sniffs once.
+
+Twice.
+
+Then charges past you after it.
+
+You grab the shard and run.`,
+    enter:()=>getShard(3),
+    choices:[
+      ["ð Join the three shards","gate"]
+    ]
+  },
+  caveFight: {
+    chapter:"Boss Battle", title:"The Cave Guardian", img:4,
+    text:`A giant shadow-beast blocks the third shard.
+
+This one is not impressed by your flashlight.`,
+    battle:{name:"Cave Guardian",hp:14,maxHp:14,next:"afterCave"},
+    choices:[]
+  },
+  afterCave: {
+    chapter:"Chapter 8", title:"The Final Shard", img:0,
+    text:`The guardian collapses into smoke.
+
+Behind it, Crystal Shard #3 floats above a stone pedestal.`,
+    enter:()=>getShard(3),
+    choices:[
+      ["ð Join the three shards","gate"]
+    ]
+  },
+  fightBigfoot: {
+    chapter:"Bad Decision", title:"Bigfoot Fight", img:4,
+    text:`You square up with Bigfoot.
+
+The forest itself seems embarrassed for you.`,
+    battle:{name:"Bigfoot",hp:18,maxHp:18,next:"bigfootRespect"},
+    choices:[]
+  },
+  bigfootRespect: {
+    chapter:"Unexpected Result", title:"Bigfoot Respect", img:5,
+    text:`Bigfoot could clearly have flattened you whenever he wanted.
+
+Instead, he gives you a slow approving nod.
+
+You have earned either respect or pity. We'll call it respect.`,
+    enter:()=>{gainXP(40); state.hp=Math.max(1,state.hp);},
+    choices:[
+      ["ð¦ Continue the shard quest","track"]
+    ]
+  },
+  gate: {
+    chapter:"Final Chapter", title:"The Three-Shard Gate", img:0,
+    text:`The three shards fuse into a single crystal.
+
+The forest shakes.
+
+A stone gate rises from beneath the roots, glowing with red cracks.
+
+The unicorn stands on one side of you. Bigfoot stands on the other.
+
+The gate opens.`,
+    enter:()=>{ if(state.shards<3) state.shards=3; gainXP(50); },
+    choices:[
+      ["â¨ Use Unicorn Flash","finalMagic"],
+      ["ð¦¶ Trust Bigfoot to lead the charge","finalBigfoot"],
+      ["ðª Charge in yourself","finalSolo"]
+    ]
+  },
+  finalMagic: {
+    chapter:"Ending", title:"Unicorn Rider", img:6,
+    text:`You raise your marked hand.
+
+The unicorn's light explodes through the gate. The darkness shatters into thousands of silver sparks.
+
+The forest is safe.
+
+The unicorn kneels and lets you climb onto its back.
+
+TITLE EARNED: UNICORN RIDER`,
+    end:true, choices:[]
+  },
+  finalBigfoot: {
+    chapter:"Ending", title:"Friend of Bigfoot", img:3,
+    text:`You step aside.
+
+Bigfoot cracks his knuckles and charges through the gate with the entire clan behind him.
+
+The darkness lasts roughly six seconds.
+
+At the wedding that night, the clan gives you a carved wooden token.
+
+TITLE EARNED: FRIEND OF BIGFOOT`,
+    end:true, choices:[]
+  },
+  finalSolo: {
+    chapter:"Ending", title:"Forest Tough", img:1,
+    text:`You charge into the gate yourself.
+
+It is reckless, painful, and somehow works.
+
+The unicorn blasts the darkness while Bigfoot drags you back out by the shirt.
+
+You wake up under the tree with the whole forest cheering.
+
+TITLE EARNED: FOREST TOUGH`,
+    end:true, choices:[]
+  }
+};
+
+let state = null;
+let currentScene = "start";
+let battle = null;
+
+function defaultState(){
+  return {
+    hp:10,maxHp:10,level:1,xp:0,coins:5,shards:0,
+    abilities:[],inventory:{"Flashlight":1,"Pocketknife":1,"Snack bar":1},
+    flags:{}, scene:"start"
+  };
+}
+
+function save(){
+  if(!state) return;
+  state.scene=currentScene;
+  localStorage.setItem("forestLegendsSave", JSON.stringify(state));
+}
+
+function hasSave(){ return !!localStorage.getItem("forestLegendsSave"); }
+
+function newGame(){
+  state=defaultState();
+  currentScene="start";
+  battle=null;
+  show("gameScreen");
+  renderScene(true);
+}
+
+function continueGame(){
+  try{state=JSON.parse(localStorage.getItem("forestLegendsSave"))||defaultState();}
+  catch(e){state=defaultState();}
+  currentScene=state.scene||"start";
+  battle=null;
+  show("gameScreen");
+  renderScene(false);
+}
+
+function gainXP(n){
+  if(!state) return;
+  state.xp += n;
+  const need = state.level*100;
+  if(state.xp >= need){
+    state.xp -= need;
+    state.level += 1;
+    state.maxHp += 2;
+    state.hp = state.maxHp;
+    toast("â­ LEVEL UP! Level "+state.level);
+  }
+}
+
+function damage(n){
+  state.hp=Math.max(0,state.hp-n);
+  if(state.hp===0) state.hp=1;
+}
+
+function addAbility(name){
+  if(!state.abilities.includes(name)) state.abilities.push(name);
+}
+
+function getShard(n){
+  if(state.shards < n){
+    state.shards=n;
+    gainXP(35);
+    toast("ð Crystal Shard #"+n+" acquired");
+  }
+}
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function choose(next){
+  currentScene=next;
+  battle=null;
+  renderScene(true);
+}
+
+function renderScene(runEnter){
+  const s=scenes[currentScene];
+  if(!s) return;
+  document.getElementById("chapter").textContent=s.chapter;
+  document.getElementById("sceneTitle").textContent=s.title;
+  document.getElementById("sceneImg").src=IMAGES[s.img||0];
+  document.getElementById("story").textContent=s.text;
+  document.getElementById("notice").classList.add("hidden");
+  document.getElementById("enemyBox").classList.add("hidden");
+
+  if(runEnter && s.enter && !state.flags["entered_"+currentScene]){
+    s.enter();
+    state.flags["entered_"+currentScene]=true;
+  }
+
+  if(s.battle){
+    battle={...s.battle};
+    renderBattle();
+  } else {
+    renderChoices(s);
+  }
+  updateStats();
+  save();
+}
+
+function renderChoices(s){
+  const box=document.getElementById("choices");
+  box.innerHTML="";
+  if(s.end){
+    const b=document.createElement("button");
+    b.className="choice";
+    b.textContent="ð PLAY AGAIN";
+    b.onclick=newGame;
+    box.appendChild(b);
+    return;
+  }
+  s.choices.forEach(([label,next])=>{
+    const b=document.createElement("button");
+    b.className="choice";
+    b.textContent=label;
+    b.onclick=()=>choose(next);
+    box.appendChild(b);
+  });
+}
+
+function renderBattle(){
+  const box=document.getElementById("enemyBox");
+  box.classList.remove("hidden");
+  document.getElementById("enemyName").textContent=battle.name;
+  refreshEnemy();
+  const choices=document.getElementById("choices");
+  choices.innerHTML="";
+  [
+    ["âï¸ ATTACK",()=>playerAttack()],
+    ["â¨ UNICORN FLASH",()=>magicAttack()],
+    ["ð« USE SNACK",()=>snackHeal()]
+  ].forEach(([t,fn],i)=>{
+    const b=document.createElement("button");
+    b.className="choice"+(i===0?" danger":"");
+    b.textContent=t;
+    b.onclick=fn;
+    choices.appendChild(b);
+  });
+}
+
+function playerAttack(){
+  if(!battle) return;
+  const dmg=2+Math.floor(Math.random()*4)+Math.floor(state.level/2);
+  battle.hp=Math.max(0,battle.hp-dmg);
+  toast("âï¸ You hit for "+dmg);
+  if(battle.hp<=0) return winBattle();
+  enemyTurn();
+}
+
+function magicAttack(){
+  if(!battle) return;
+  if(!state.abilities.some(a=>a.includes("Unicorn"))){
+    toast("You haven't learned Unicorn Flash yet.");
+    return;
+  }
+  const dmg=5+Math.floor(Math.random()*4);
+  battle.hp=Math.max(0,battle.hp-dmg);
+  toast("â¨ Unicorn Flash hits for "+dmg);
+  if(battle.hp<=0) return winBattle();
+  enemyTurn();
+}
+
+function snackHeal(){
+  const snack = state.inventory["Half snack bar"] || state.inventory["Snack bar"];
+  if(!snack){toast("No snack left. Civilization collapses.");return;}
+  state.hp=Math.min(state.maxHp,state.hp+4);
+  if(state.inventory["Half snack bar"]) delete state.inventory["Half snack bar"];
+  else delete state.inventory["Snack bar"];
+  toast("ð« +4 HP");
+  enemyTurn();
+}
+
+function enemyTurn(){
+  const dmg=1+Math.floor(Math.random()*3);
+  state.hp=Math.max(0,state.hp-dmg);
+  if(state.hp<=0){
+    state.hp=Math.max(1,Math.floor(state.maxHp/2));
+    toast("ð You got flattened. Bigfoot drags you to safety.");
+  } else toast("ð¥ "+battle.name+" hits for "+dmg);
+  refreshEnemy();
+  updateStats();
+  save();
+}
+
+function winBattle(){
+  gainXP(40);
+  toast("ð "+battle.name+" defeated");
+  const next=battle.next;
+  battle=null;
+  setTimeout(()=>choose(next),500);
+}
+
+function refreshEnemy(){
+  document.getElementById("enemyHpText").textContent=battle.hp+" / "+battle.maxHp+" HP";
+  document.getElementById("enemyHpBar").style.width=(battle.hp/battle.maxHp*100)+"%";
+}
+
+function updateStats(){
+  document.getElementById("hpText").textContent=state.hp+"/"+state.maxHp;
+  document.getElementById("levelText").textContent=state.level;
+  document.getElementById("xpText").textContent=state.xp;
+  document.getElementById("shardsText").textContent=state.shards+"/3";
+}
+
+function openMenu(){
+  if(!state) return;
+  renderMenu();
+  show("menuScreen");
+}
+
+function closeMenu(){
+  if(!state){show("titleScreen");return;}
+  show("gameScreen");
+}
+
+function renderMenu(){
+  const inv=document.getElementById("inventory");
+  inv.innerHTML="";
+  Object.entries(state.inventory).forEach(([k,v])=>{
+    const d=document.createElement("div");
+    d.className="inv";
+    d.innerHTML="<b>"+k+"</b><br><span class='small'>x"+v+"</span>";
+    inv.appendChild(d);
+  });
+  const pills=document.getElementById("abilityPills");
+  pills.innerHTML=(state.abilities.length?state.abilities:["No special abilities yet"]).map(x=>"<span class='pill'>"+x+"</span>").join("");
+}
+
+function confirmReset(){
+  if(confirm("Reset Forest Legends and erase saved progress?")){
+    localStorage.removeItem("forestLegendsSave");
+    state=null; battle=null; currentScene="start";
+    document.getElementById("continueBtn").classList.add("hidden");
+    show("titleScreen");
+  }
+}
+
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer=setTimeout(()=>t.classList.remove("show"),1400);
+}
+
+window.addEventListener("load",()=>{
+  if(hasSave()) document.getElementById("continueBtn").classList.remove("hidden");
+});
+</script>
+</body>
+</html>
